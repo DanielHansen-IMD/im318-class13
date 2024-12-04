@@ -1,7 +1,20 @@
 <script>
+import {onMount} from 'svelte';
 let todoItem = $state('');
 let todoList = $state([]);
 let doneList = $state([]);
+let storedList;
+
+onMount(() => {
+     storedList = localStorage.getItem('storedList');
+     if (storedList) {
+          todoList = (JSON.parse(storedList));
+     }
+})
+
+function updateList() {
+     return storedList = localStorage.setItem('storedList', JSON.stringify(todoList));
+}
 
 function addItem(event) {
      event.preventDefault();
@@ -12,22 +25,27 @@ function addItem(event) {
           text: todoItem,
           done: false
      }];
+     updateList();
      todoItem = '';
 }
 function removeItem(index) {
      todoList = todoList.toSpliced(index, 1);
+     updateList();
 }
 function nuke() {
      todoList = [];
+     localStorage.clear();
 }
-$effect(() => {
+/* $effect(() => {
      doneList = todoList.filter((item) => item.done);
-})
-function undoThis(item) {
+     updateList();
+})*/
+/*function undoThis(item) {
      item.done = !item.done;
-}
+     updateList();  
+}*/
 $inspect('To Do List: ', todoList);
-$inspect('Done List: ', doneList);
+//$inspect('Done List: ', doneList);
 </script>
 <form onsubmit={addItem}>
 <input type="text" bind:value={todoItem}>
@@ -99,8 +117,11 @@ ul {
      list-style: none;
      padding: 0;
 }
-li.done {
+/*li.done {
      display: none;
+}*/
+li.done span {
+     text-decoration: line-through;
 }
 li button {
      background-color: transparent;
