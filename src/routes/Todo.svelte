@@ -56,7 +56,7 @@ $inspect('To Do List: ', todoList);
      <ul>
           {#each todoList as item, index}
                <li class:done={item.done}>
-                    <input type="checkbox" bind:checked={item.done}>
+                    <input type="checkbox" bind:checked={item.done} onchange={updateList}>
                     <span>{item.text}</span>
                     <button type="button" onclick={() => removeItem(index)}>x</button>
                </li>
