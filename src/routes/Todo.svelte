@@ -3,17 +3,16 @@ import {onMount} from 'svelte';
 let todoItem = $state('');
 let todoList = $state([]);
 let doneList = $state([]);
-let storedList;
 
 onMount(() => {
-     storedList = localStorage.getItem('storedList');
+     let storedList = localStorage.getItem('storedList');
      if (storedList) {
           todoList = (JSON.parse(storedList));
      }
 })
 
 function updateList() {
-     return storedList = localStorage.setItem('storedList', JSON.stringify(todoList));
+     return localStorage.setItem('storedList', JSON.stringify(todoList));
 }
 
 function addItem(event) {
@@ -25,8 +24,8 @@ function addItem(event) {
           text: todoItem,
           done: false
      }];
-     updateList();
      todoItem = '';
+     updateList();
 }
 function removeItem(index) {
      todoList = todoList.toSpliced(index, 1);
@@ -36,6 +35,10 @@ function nuke() {
      todoList = [];
      localStorage.clear();
 }
+function clearDone() {
+     todoList = todoList.filter((item) => !item.done);
+     updateList();
+}
 /* $effect(() => {
      doneList = todoList.filter((item) => item.done);
      updateList();
@@ -44,7 +47,7 @@ function nuke() {
      item.done = !item.done;
      updateList();  
 }*/
-$inspect('To Do List: ', todoList);
+// $inspect('To Do List: ', todoList);
 //$inspect('Done List: ', doneList);
 </script>
 <form onsubmit={addItem}>
@@ -52,39 +55,40 @@ $inspect('To Do List: ', todoList);
 <button type="submit">Add</button>
 </form>
 <div class="lists">
-<div class="todo-list">
-     <ul>
-          {#each todoList as item, index}
-               <li class:done={item.done}>
-                    <input type="checkbox" bind:checked={item.done} onchange={updateList}>
-                    <span>{item.text}</span>
-                    <button type="button" onclick={() => removeItem(index)}>x</button>
-               </li>
-          {/each}
-     </ul>
-     {#if (todoList.length == 0)}
-          <button disabled type="button">Nuclear Option</button>
-     {:else}
-          <button type="button" onclick={nuke}>Nuclear Option</button>
-     {/if}
-</div>
+     <div class="todo-list">
+          <ul>
+               {#each todoList as item, index}
+                    <li class:done={item.done}>
+                         <input type="checkbox" bind:checked={item.done} onchange={updateList}>
+                         <span>{item.text}</span>
+                         <button type="button" onclick={() => removeItem(index)}>x</button>
+                    </li>
+               {/each}
+          </ul>
+          {#if (todoList.length == 0)}
+               <button disabled type="button">Nuclear Option</button>
+          {:else}
+               <button type="button" onclick={nuke}>Nuclear Option</button>
+               <button type="button" onclick={clearDone}>Clear Done</button>
+          {/if}
+     </div>
 
      {#if (doneList.length > 0)}
      <div class="done-list">
           <h2>Done Items</h2>
-     {#each doneList as item}
-          <li>
-               <span>{item.text}</span>
-               <button type="button" onclick={()=> undoThis(item)}>undo</button>
-          </li>
-     {/each}
+          {#each doneList as item}
+               <li>
+                    <span>{item.text}</span>
+                    <button type="button" onclick={()=> undoThis(item)}>undo</button>
+               </li>
+          {/each}
      </div>
      {/if}
 </div>
 <style>
-     form {
-          display: flex;
-     }
+form {
+     display: flex;
+}
 input[type="text"] {
      border-top-left-radius: 50px;
      border-bottom-left-radius: 50px;
